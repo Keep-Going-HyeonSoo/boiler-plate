@@ -1,10 +1,13 @@
+import morgan from 'morgan'
 import User from './models/User'
+import config from './config'
 
 const express = require('express')
 const mongoose = require('mongoose')
 
 const app = express()
-const port = 3000
+
+app.use(morgan('tiny'))
 
 app.use(express.json())
 app.use(
@@ -14,15 +17,12 @@ app.use(
 )
 
 mongoose
-  .connect(
-    'mongodb+srv://admin:1234@main.ur6bv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true
-    }
-  )
+  .connect(config.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+  })
   .then(() => console.log('😊mongoDB connected!'))
   .catch((err) => console.log(err))
 
@@ -50,6 +50,6 @@ app.post('/register', (req, res) => {
     )
 })
 
-app.listen(port, () => {
-  console.log(`💟Example app listening at http://localhost:${port}`)
+app.listen(config.PORT, () => {
+  console.log(`💟Example app listening at http://localhost:${config.PORT}`)
 })
