@@ -1,4 +1,7 @@
 import mongoose from 'mongoose'
+import bcrypt from 'bcrypt'
+
+const saltRounds = 10
 
 const userSchema = mongoose.Schema({
   name: {
@@ -33,6 +36,19 @@ const userSchema = mongoose.Schema({
   },
   tokenExp: {
     type: Number
+  }
+})
+
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    try {
+      const hashPW = await bcrypt.hash(this.password, saltRounds)
+      this.password = hashPW
+      next()
+    } catch (error) {
+      console.log(error)
+      next(error)
+    }
   }
 })
 
