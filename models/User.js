@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const saltRounds = 10
 
@@ -60,6 +61,24 @@ userSchema.methods.comparePassword = async function (plainPassword, cb) {
     cb(result)
   } catch (error) {
     console.log(error)
+  }
+}
+
+userSchema.methods.generateToken = async function (cb) {
+  // console.log('this', this._id.toHexString())
+  // this.id 로 하면 안되고, this._id 로 해야 한다.
+
+  // json web token 을 이용해서 token 을 생성하기
+
+  // token 은 this.id (user.id) + 'secretKey' 가 합쳐져서 생성된다.
+  // 나중에 'secretKey' 를 이용해서 token 을 decode 하면 user.id 를 얻게 된다.
+  const token = jwt.sign(this._id.toHexString(), 'secretKey')
+  this.token = token
+  try {
+    const user = await this.save()
+    cb(null, user)
+  } catch (error) {
+    cb(error)
   }
 }
 
