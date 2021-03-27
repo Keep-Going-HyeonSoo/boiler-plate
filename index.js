@@ -30,6 +30,26 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+app.post('/login', async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email })
+    if (user) {
+      user.comparePassword(req.body.password, (isMatch) => {
+        if (isMatch) {
+          res.json({ message: 'success', user })
+        } else {
+          res.json({ message: 'password not correct' })
+        }
+      })
+    } else {
+      return res.json({ message: '이메일이 존재하지 않습니다' })
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'server error' })
+  }
+})
+
 app.post('/register', (req, res) => {
   console.log(req.body)
   const user = new User(req.body)
@@ -38,13 +58,13 @@ app.post('/register', (req, res) => {
     .save()
     .then((result) =>
       res.status(200).json({
-        success: true,
+        message: 'register success',
         result
       })
     )
     .catch((err) =>
       res.status(500).json({
-        success: false,
+        message: 'register failed',
         err
       })
     )
