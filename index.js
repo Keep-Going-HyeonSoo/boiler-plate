@@ -91,6 +91,13 @@ app.get('/api/users/auth', isAuth, (req, res) => {
   res.status(200).json(req.user)
 })
 
+app.get('/api/users/logout', isAuth, (req, res) => {
+  User.findOneAndUpdate({ _id: req.user._id }, { token: '' }, (err, user) => {
+    if (err) return res.json({ success: false, err })
+    return res.status(200).json({ success: true })
+  })
+})
+
 app.listen(config.PORT, () => {
   console.log(`💟Example app listening at http://localhost:${config.PORT}`)
 })
