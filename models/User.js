@@ -72,7 +72,7 @@ userSchema.methods.generateToken = async function (cb) {
 
   // token 은 this.id (user.id) + 'secretKey' 가 합쳐져서 생성된다.
   // 나중에 'secretKey' 를 이용해서 token 을 decode 하면 user.id 를 얻게 된다.
-  const token = jwt.sign(this._id.toHexString(), 'secretKey')
+  const token = jwt.sign(this._id.toHexString(), 'abcd')
   this.token = token
   try {
     const user = await this.save()
@@ -80,6 +80,20 @@ userSchema.methods.generateToken = async function (cb) {
   } catch (error) {
     cb(error)
   }
+}
+
+userSchema.statics.findByToken = function (token, cb) {
+  const user = this
+  jwt.verify(token, 'abcd', function (err, decoded) {
+    // token 을 'abcd' key 를 이용해서 decode 한다.
+    // decode의 결과값인 decoded 값은 user 의 id 임
+    // 유저 아이디를 이용해서 유저를 찾기
+    user.findOne({ _id: decoded, token }, function (err, user) {
+      if (err) return cb(err)
+      cb(null, user)
+    })
+    // 클라에서 가져온 token 과 DB에 저장돼있는 토큰을 비교
+  })
 }
 
 const User = mongoose.model('User', userSchema)
